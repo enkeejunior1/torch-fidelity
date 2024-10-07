@@ -16,6 +16,17 @@ class TransformPILtoRGBTensor:
         return F.pil_to_tensor(img)
 
 
+class ImagesTensorDataset(Dataset):
+    def __init__(self, images):
+        self.images = images
+
+    def __len__(self):
+        return self.images.shape[0]
+
+    def __getitem__(self, i):
+        return self.images[i]
+    
+
 class ImagesPathDataset(Dataset):
     def __init__(self, files, transforms=None):
         self.files = files

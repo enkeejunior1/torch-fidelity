@@ -10,7 +10,7 @@ from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
 
 from torch_fidelity import GenerativeModelModuleWrapper
-from torch_fidelity.datasets import ImagesPathDataset, TransformPILtoRGBTensor
+from torch_fidelity.datasets import ImagesPathDataset, ImagesTensorDataset, TransformPILtoRGBTensor
 from torch_fidelity.defaults import DEFAULTS
 from torch_fidelity.feature_extractor_base import FeatureExtractorBase
 from torch_fidelity.generative_model_base import GenerativeModelBase
@@ -283,6 +283,14 @@ def prepare_input_from_descriptor(input_desc, **kwargs):
                 input_desc["input_model_z_size"],
                 input_desc["input_model_z_type"],
                 input_desc["input_model_num_classes"],
+            )
+        elif os.path.isfile(input) and input.endswith(".pt"):
+            input = torch.load(input, map_location="cpu").to(torch.uint8)
+            if len(input.shape) == 2:
+                resolution = int(np.sqrt(input.shape[1] / 3))
+                input = input.reshape(-1, 3, resolution, resolution) # CIFAR10
+            input = ImagesTensorDataset(
+                input,
             )
         else:
             bad_input = True
